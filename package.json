@@ -23,6 +23,7 @@
     "primeicons": "^5.0.0",
     "primeng": "^13.3.3",
     "quill": "^2.0.0-dev.4",
+    "quill-better-table": "^1.2.10",
     "rxjs": "~7.4.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
