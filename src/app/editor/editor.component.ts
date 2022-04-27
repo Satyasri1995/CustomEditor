@@ -4,6 +4,8 @@ import {
   EventEmitter,
   Input,
   Output,
+  SimpleChange,
+  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import { fromEvent } from 'rxjs';
@@ -32,18 +34,25 @@ export class EditorComponent  {
     this.editorId=this.getEditorID(10);
   }
 
-
-
-
-  OnValueChange() {
-    this.valueChange.emit(this.value);
+  ngOnChanges(changes:SimpleChanges){
+    let readOnlyChange:SimpleChange=changes['readOnly'];
+    let valueChange:SimpleChange=changes['value'];
+    if(readOnlyChange){
+      if(typeof readOnlyChange.currentValue=='boolean'){
+        if(this.quill){
+          this.quill.enable(!this.readOnly)
+        }
+      }
+    }
+    if(valueChange){
+      if(valueChange.currentValue && this.quill){
+        this.quill.root.innerHTML=this.value;
+      }
+    }
   }
 
-  ngAfterViewInit(): void {
-    this.placeholder=this.value?'':this.placeholder;
-    Quill.register({
-      'modules/better-table': quillBetterTable
-    }, true);
+
+  InitializeQuill(){
     this.quill = new Quill(this.customEditor.nativeElement, {
       theme: 'snow',
       readOnly: this.readOnly,
@@ -85,16 +94,23 @@ export class EditorComponent  {
         ],
       },
     });
-     this.quill.container.firstElementChild.innerHTML=this.value
+    this.quill.root.innerHTML=this.value;
     this.insertTableControls();
     this.table = this.quill.getModule('better-table');
     this.quill.on(
       'text-change',
       (_delta: any, _oldDelta: any, source: string) => {
-        this.value = this.quill.container.innerHTML;
-        this.OnValueChange();
+        this.value = this.quill.root.innerHTML;
+        this.valueChange.emit(this.value);
       }
     );
+  }
+  ngAfterViewInit(): void {
+    this.placeholder=this.value?'':this.placeholder;
+    Quill.register({
+      'modules/better-table': quillBetterTable
+    }, true);
+    this.InitializeQuill();
   }
 
   insertTableControls() {
