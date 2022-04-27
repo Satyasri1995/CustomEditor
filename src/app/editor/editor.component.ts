@@ -8,7 +8,7 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
-import { fromEvent } from 'rxjs';
+import { debounceTime, fromEvent } from 'rxjs';
 declare const Quill: any;
 declare const quillBetterTable:any;
 
@@ -20,6 +20,7 @@ declare const quillBetterTable:any;
 export class EditorComponent  {
   @Input() value!: string;
   @Input() readOnly: boolean = false;
+  @Input() resetOnChange:boolean=false;
   @Input() placeholder: string = 'Place your content here';
 
   @Output() valueChange = new EventEmitter<string>();
@@ -44,11 +45,7 @@ export class EditorComponent  {
         }
       }
     }
-    if(valueChange){
-      if(valueChange.currentValue && this.quill){
-        this.quill.root.innerHTML=this.value;
-      }
-    }
+
   }
 
 
@@ -100,6 +97,7 @@ export class EditorComponent  {
     this.quill.on(
       'text-change',
       (_delta: any, _oldDelta: any, source: string) => {
+        console.log(source)
         this.value = this.quill.root.innerHTML;
         this.valueChange.emit(this.value);
       }
